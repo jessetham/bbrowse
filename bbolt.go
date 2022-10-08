@@ -7,7 +7,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-func OpenAndCopyBoltDB(filename string) (*DB, error) {
+func OpenAndCopyBoltDB(filename string) (*Bucket, error) {
 	if _, err := os.Stat(filename); err != nil {
 		return nil, err
 	}
@@ -19,8 +19,8 @@ func OpenAndCopyBoltDB(filename string) (*DB, error) {
 	return copyBoltDB(db)
 }
 
-func copyBoltDB(boltDB *bolt.DB) (*DB, error) {
-	db := DB{}
+func copyBoltDB(boltDB *bolt.DB) (*Bucket, error) {
+	root := Bucket{Name: []byte("root")}
 	err := boltDB.View(func(tx *bolt.Tx) error {
 		if err := tx.ForEach(func(name []byte, b *bolt.Bucket) error {
 			bucket, err := copyBoltBucket(b)
@@ -28,14 +28,14 @@ func copyBoltDB(boltDB *bolt.DB) (*DB, error) {
 				return err
 			}
 			bucket.Name = name
-			db.Buckets = append(db.Buckets, bucket)
+			root.Buckets = append(root.Buckets, bucket)
 			return nil
 		}); err != nil {
 			return err
 		}
 		return nil
 	})
-	return &db, err
+	return &root, err
 }
 
 func copyBoltBucket(b *bolt.Bucket) (*Bucket, error) {
