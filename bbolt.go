@@ -27,7 +27,7 @@ func copyBoltDB(boltDB *bolt.DB) (*Bucket, error) {
 			if err != nil {
 				return err
 			}
-			bucket.Name = name
+			bucket.Name = copyBytes(name)
 			root.Buckets = append(root.Buckets, bucket)
 			return nil
 		}); err != nil {
