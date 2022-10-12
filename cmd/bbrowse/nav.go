@@ -6,18 +6,16 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type navModel struct {
 	list     list.Model
 	keys     *navKeyMap
-	styles   lipgloss.Style
 	stack    []Bucket
 	stackLen int
 }
 
-func newNavModel(styles lipgloss.Style) navModel {
+func newNavModel() navModel {
 	navKeys := newNavKeyMap()
 
 	navDelegate := list.NewDefaultDelegate()
@@ -28,10 +26,9 @@ func newNavModel(styles lipgloss.Style) navModel {
 	navList := list.New([]list.Item{}, navDelegate, 0, 0)
 
 	return navModel{
-		list:   navList,
-		keys:   navKeys,
-		styles: styles,
-		stack:  []Bucket{},
+		list:  navList,
+		keys:  navKeys,
+		stack: []Bucket{},
 	}
 }
 
@@ -90,7 +87,7 @@ func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
 }
 
 func (n navModel) View() string {
-	return n.styles.Render(n.list.View())
+	return n.list.View()
 }
 
 type navKeyMap struct {

@@ -19,7 +19,7 @@ type model struct {
 func newModel(filename string) model {
 	return model{
 		filename: filename,
-		nav:      newNavModel(navStyles),
+		nav:      newNavModel(),
 	}
 }
 
@@ -31,11 +31,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-	case initMsg:
-		updatedNavModel, cmd := m.nav.Update(Bucket(msg))
-		m.nav = updatedNavModel
-		return m, cmd
-
 	case error:
 		m.err = msg
 	}
@@ -52,7 +47,7 @@ func (m model) View() string {
 		return fmt.Sprintf("\nThere's been an error: %v\n\n", m.err)
 	}
 
-	return m.nav.View()
+	return navStyles.Render(m.nav.View())
 }
 
 func main() {
