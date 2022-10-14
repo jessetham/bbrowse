@@ -27,7 +27,7 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.viewport.Width = msg.Width
-		v.viewport.Height = msg.Height
+		v.viewport.Height = msg.Height / 2
 
 	case Pair:
 		for _, formatter := range v.formatters {

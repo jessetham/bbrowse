@@ -40,7 +40,7 @@ func (n navModel) Init() tea.Cmd {
 func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		n.list.SetSize(msg.Width, msg.Height)
+		n.list.SetSize(msg.Width, msg.Height / 2)
 
 	case tea.KeyMsg:
 		// Don't navigate when filtering list items

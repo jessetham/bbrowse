@@ -65,7 +65,7 @@ func (m model) View() string {
 		return fmt.Sprintf("\nThere's been an error: %v\n\n", m.err)
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Center, styles.Render(m.nav.View()), styles.Render(m.viewer.View()))
+	return lipgloss.JoinVertical(lipgloss.Left, styles.Render(m.viewer.View()), styles.Render(m.nav.View()))
 }
 
 func main() {
