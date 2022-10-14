@@ -1,12 +1,19 @@
 package bbrowse
 
 import (
+	"bytes"
+	"encoding/gob"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	bolt "go.etcd.io/bbolt"
 )
+
+type a struct {
+	B string
+	C int
+}
 
 func TestCopyBoltDB_Success(t *testing.T) {
 	boltDB, err := createTestDB(t)
@@ -46,6 +53,11 @@ func createTestDB(t *testing.T) (*bolt.DB, error) {
 			return err
 		}
 
+		err = bucket.Put([]byte("gob"), createGOB())
+		if err != nil {
+			return err
+		}
+
 		// Add a nested bucket
 		nestedBucket, err := bucket.CreateBucket([]byte("nested bucket"))
 		if err != nil {
@@ -64,4 +76,11 @@ func createTestDB(t *testing.T) (*bolt.DB, error) {
 	}
 
 	return db, nil
+}
+
+func createGOB() []byte {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	enc.Encode(a{B: "hello", C: 42})
+	return buf.Bytes()
 }

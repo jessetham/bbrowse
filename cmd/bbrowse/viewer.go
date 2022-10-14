@@ -1,18 +1,20 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type viewerModel struct {
 	viewport   viewport.Model
-	formatters   []formatter
+	formatters []formatter
 }
 
 func newViewerModel() viewerModel {
 	return viewerModel{
-		viewport: viewport.New(0, 0),
+		viewport:   viewport.New(0, 0),
 		formatters: newFormatterList(),
 	}
 }
@@ -36,7 +38,7 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 		}
 
 	case Bucket:
-		v.viewport.SetContent("Bucket")
+		v.viewport.SetContent(fmt.Sprintf("# of nested buckets: %d | # of pairs: %d", len(msg.Buckets), len(msg.Pairs)))
 	}
 	return v, nil
 }

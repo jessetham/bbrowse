@@ -22,6 +22,7 @@ func newNavModel() navModel {
 	navKeyBindings := []key.Binding{navKeys.forward, navKeys.back}
 	navDelegate.ShortHelpFunc = func() []key.Binding { return navKeyBindings }
 	navDelegate.FullHelpFunc = func() [][]key.Binding { return [][]key.Binding{navKeyBindings} }
+	navDelegate.ShowDescription = false
 
 	navList := list.New([]list.Item{}, navDelegate, 0, 0)
 

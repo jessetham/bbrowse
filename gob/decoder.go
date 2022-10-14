@@ -5,9 +5,9 @@
 package gob
 
 import (
+	"bbrowse/internal/saferio"
 	"bufio"
 	"errors"
-	"bbrowse/internal/saferio"
 	"io"
 	"reflect"
 	"sync"

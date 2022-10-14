@@ -15,7 +15,8 @@ func (b Bucket) FilterValue() string { return string(b.Name) }
 
 type Pair bbrowse.Pair
 
-func (p Pair) Title() string       { return string(p.Key) }
+func (p Pair) Title() string { return string(p.Key) }
+
 // TODO: Need to convert value to string for structs
 func (p Pair) Description() string { return string(p.Value) }
 func (p Pair) FilterValue() string { return string(p.Key) }
