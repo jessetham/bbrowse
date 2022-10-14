@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -68,13 +69,12 @@ func (m model) View() string {
 }
 
 func main() {
-	filename := "572009747.db"
-
-	f, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		log.Fatal(err)
+	flag.Parse()
+	filename := flag.Arg(0)
+	if filename == "" {
+		log.Fatal("no filename given")
 	}
-	defer f.Close()
+
 	if err := tea.NewProgram(newModel(filename)).Start(); err != nil {
 		log.Fatal(err)
 	}
