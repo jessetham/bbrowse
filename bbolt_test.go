@@ -10,6 +10,11 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+type d struct {
+	A a
+	E int
+}
+
 type a struct {
 	B string
 	C int
@@ -81,6 +86,6 @@ func createTestDB(t *testing.T) (*bolt.DB, error) {
 func createGOB() []byte {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
-	enc.Encode(a{B: "hello", C: 42})
+	enc.Encode(d{A: a{B: "hello", C: 42}, E: 24})
 	return buf.Bytes()
 }

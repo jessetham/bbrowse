@@ -32,7 +32,13 @@ var dumpBytes = false // If true, print the remaining bytes in the input buffer 
 var (
 	blanks = bytes.Repeat([]byte{' '}, 3*10)
 	empty  = []byte(": <empty>\n")
-	tabs   = strings.Repeat(" ", 100)
+	tabs   = func() []string {
+		var buf []string
+		for i := 0; i < 100; i++ {
+			buf = append(buf, "  ")
+		}
+		return buf
+	}()
 )
 
 // tab indents itself when printed.
@@ -43,7 +49,7 @@ func (t tab) String() string {
 	if n > len(tabs) {
 		n = len(tabs)
 	}
-	return tabs[0:n]
+	return strings.Join(tabs[0:n], "")
 }
 
 func (t tab) print(w io.Writer) {
