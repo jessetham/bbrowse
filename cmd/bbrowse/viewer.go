@@ -7,14 +7,13 @@ import (
 
 type viewerModel struct {
 	viewport   viewport.Model
-	adapters   []adapter
-	adapterIdx int
+	formatters   []formatter
 }
 
 func newViewerModel() viewerModel {
 	return viewerModel{
 		viewport: viewport.New(0, 0),
-		adapters: newAdapterList(),
+		formatters: newFormatterList(),
 	}
 }
 
@@ -29,11 +28,11 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 		v.viewport.Height = msg.Height
 
 	case Pair:
-		s, err := v.adapters[v.adapterIdx].toString(msg.Value)
-		if err != nil {
-			v.viewport.SetContent("error converting pair value")
-		} else {
-			v.viewport.SetContent(s)
+		for _, formatter := range v.formatters {
+			if c, ok := formatter(msg.Value); ok {
+				v.viewport.SetContent(c)
+				break
+			}
 		}
 
 	case Bucket:
