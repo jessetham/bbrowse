@@ -5,11 +5,13 @@ import (
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/reflow/wrap"
 )
 
 type viewerModel struct {
 	viewport   viewport.Model
 	formatters []formatter
+	content    string
 }
 
 func newViewerModel() viewerModel {
@@ -32,14 +34,15 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 	case Pair:
 		for _, formatter := range v.formatters {
 			if c, ok := formatter(msg.Value); ok {
-				v.viewport.SetContent(c)
+				v.content = c
 				break
 			}
 		}
 
 	case Bucket:
-		v.viewport.SetContent(fmt.Sprintf("# of nested buckets: %d | # of pairs: %d", len(msg.Buckets), len(msg.Pairs)))
+		v.content = fmt.Sprintf("# of nested buckets: %d | # of pairs: %d", len(msg.Buckets), len(msg.Pairs))
 	}
+	v.viewport.SetContent(wrap.String(v.content, v.viewport.Width))
 	return v, nil
 }
 
