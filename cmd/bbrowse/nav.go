@@ -42,6 +42,10 @@ func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
 		n.list.SetSize(msg.Width, msg.Height)
 
 	case tea.KeyMsg:
+		// Don't navigate when filtering list items
+		if n.list.SettingFilter() {
+			break
+		}
 		switch {
 		case key.Matches(msg, n.keys.forward):
 			if bucket, ok := n.list.SelectedItem().(Bucket); ok {
