@@ -56,10 +56,16 @@ func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
 		case key.Matches(msg, n.keys.forward):
 			if bucket, ok := n.list.SelectedItem().(Bucket); ok {
 				n.stack = append(n.stack, bucket)
+			} else {
+				// Prevent pagination navigation
+				return n, nil
 			}
 		case key.Matches(msg, n.keys.back):
 			if len(n.stack) > 1 {
 				n.stack = n.stack[:len(n.stack)-1]
+			} else {
+				// Prevent pagination navigation
+				return n, nil
 			}
 		}
 
