@@ -33,8 +33,8 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		v.viewport.Width = msg.Width
-		v.viewport.Height = msg.Height / 2
+		v.viewport.Width = msg.Width - 2
+		v.viewport.Height = msg.Height/2 - 2
 
 	case Pair:
 		for _, formatter := range v.formatters {
@@ -58,4 +58,12 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 
 func (v viewerModel) View() string {
 	return v.viewport.View()
+}
+
+func (v viewerModel) Height() int {
+	return v.viewport.Height
+}
+
+func (v viewerModel) Width() int {
+	return v.viewport.Width
 }

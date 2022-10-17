@@ -9,7 +9,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var styles = lipgloss.NewStyle()
+func getUnfocusedStyle(height, width int) lipgloss.Style {
+	return lipgloss.NewStyle().Height(height).Width(width).BorderStyle(lipgloss.NormalBorder())
+}
+
+func getFocusedStyle(height, width int) lipgloss.Style {
+	return getUnfocusedStyle(height, width).BorderForeground(lipgloss.Color("42"))
+}
 
 type model struct {
 	filename      string
@@ -39,7 +45,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.String() == "tab" {
+		msgString := msg.String()
+
+		if msgString == "ctrl+c" {
+			return m, tea.Quit
+		}
+
+		if msgString == "tab" {
 			m.viewerFocused = !m.viewerFocused
 		} else if m.viewerFocused {
 			m.viewer, cmd = m.viewer.Update(msg)
@@ -71,7 +83,18 @@ func (m model) View() string {
 		return fmt.Sprintf("\nThere's been an error: %v\n\n", m.err)
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Left, styles.Render(m.viewer.View()), styles.Render(m.nav.View()))
+	var (
+		viewerRender string
+		navRender    string
+	)
+	if m.viewerFocused {
+		viewerRender = getFocusedStyle(m.viewer.Height(), m.viewer.Width()).Render(m.viewer.View())
+		navRender = getUnfocusedStyle(m.nav.Height(), m.nav.Width()).Render(m.nav.View())
+	} else {
+		viewerRender = getUnfocusedStyle(m.viewer.Height(), m.viewer.Width()).Render(m.viewer.View())
+		navRender = getFocusedStyle(m.nav.Height(), m.nav.Width()).Render(m.nav.View())
+	}
+	return lipgloss.JoinVertical(lipgloss.Left, viewerRender, navRender)
 }
 
 func main() {
