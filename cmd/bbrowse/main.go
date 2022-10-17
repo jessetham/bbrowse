@@ -12,10 +12,11 @@ import (
 var styles = lipgloss.NewStyle()
 
 type model struct {
-	filename string
-	nav      navModel
-	viewer   viewerModel
-	err      error
+	filename      string
+	nav           navModel
+	viewer        viewerModel
+	err           error
+	viewerFocused bool
 }
 
 func newModel(filename string) model {
@@ -31,31 +32,36 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		updatedNavModel, cmd := m.nav.Update(msg)
-		m.nav = updatedNavModel
-		cmds = append(cmds, cmd)
+		if msg.String() == "tab" {
+			m.viewerFocused = !m.viewerFocused
+		} else if m.viewerFocused {
+			m.viewer, cmd = m.viewer.Update(msg)
+			cmds = append(cmds, cmd)
+		} else {
+			m.nav, cmd = m.nav.Update(msg)
+			cmds = append(cmds, cmd)
 
-		updatedViewerModel, cmd := m.viewer.Update(updatedNavModel.list.SelectedItem())
-		m.viewer = updatedViewerModel
-		cmds = append(cmds, cmd)
-
-		return m, tea.Batch(cmds...)
+			m.viewer, cmd = m.viewer.Update(m.nav.list.SelectedItem())
+			cmds = append(cmds, cmd)
+		}
 
 	case error:
 		m.err = msg
+
+	default:
+		m.nav, cmd = m.nav.Update(msg)
+		cmds = append(cmds, cmd)
+
+		m.viewer, cmd = m.viewer.Update(msg)
+		cmds = append(cmds, cmd)
 	}
-
-	updatedNavModel, cmd := m.nav.Update(msg)
-	m.nav = updatedNavModel
-	cmds = append(cmds, cmd)
-
-	updatedViewerModel, cmd := m.viewer.Update(msg)
-	m.viewer = updatedViewerModel
-	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
@@ -75,7 +81,7 @@ func main() {
 		log.Fatal("no filename given")
 	}
 
-	if err := tea.NewProgram(newModel(filename)).Start(); err != nil {
+	if err := tea.NewProgram(newModel(filename), tea.WithAltScreen()).Start(); err != nil {
 		log.Fatal(err)
 	}
 }

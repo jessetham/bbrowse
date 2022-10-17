@@ -38,9 +38,14 @@ func (n navModel) Init() tea.Cmd {
 }
 
 func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		n.list.SetSize(msg.Width, msg.Height / 2)
+		n.list.SetSize(msg.Width, msg.Height/2)
 
 	case tea.KeyMsg:
 		// Don't navigate when filtering list items
@@ -56,6 +61,10 @@ func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
 			if len(n.stack) > 1 {
 				n.stack = n.stack[:len(n.stack)-1]
 			}
+		// Let list handle keystroke
+		default:
+			n.list, cmd = n.list.Update(msg)
+			cmds = append(cmds, cmd)
 		}
 
 	case Bucket:
@@ -78,17 +87,13 @@ func (n navModel) Update(msg tea.Msg) (navModel, tea.Cmd) {
 		for _, p := range displayedBucket.Pairs {
 			newItems = append(newItems, Pair(*p))
 		}
-		cmd := n.list.SetItems(newItems)
+		cmd = n.list.SetItems(newItems)
+		cmds = append(cmds, cmd)
 
 		n.stackLen = len(n.stack)
-
-		return n, cmd
 	}
 
-	updatedModel, cmd := n.list.Update(msg)
-	n.list = updatedModel
-
-	return n, cmd
+	return n, tea.Batch(cmds...)
 }
 
 func (n navModel) View() string {

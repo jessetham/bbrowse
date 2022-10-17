@@ -26,6 +26,11 @@ func (v viewerModel) Init() tea.Cmd {
 }
 
 func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.viewport.Width = msg.Width
@@ -41,9 +46,14 @@ func (v viewerModel) Update(msg tea.Msg) (viewerModel, tea.Cmd) {
 
 	case Bucket:
 		v.content = fmt.Sprintf("# of nested buckets: %d | # of pairs: %d", len(msg.Buckets), len(msg.Pairs))
+
+	default:
+		v.viewport, cmd = v.viewport.Update(msg)
+		cmds = append(cmds, cmd)
 	}
+
 	v.viewport.SetContent(wrap.String(v.content, v.viewport.Width))
-	return v, nil
+	return v, tea.Batch(cmds...)
 }
 
 func (v viewerModel) View() string {
