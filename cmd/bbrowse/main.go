@@ -12,6 +12,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/wrap"
+
+	"golang.design/x/clipboard"
 )
 
 type model struct {
@@ -27,27 +29,27 @@ type model struct {
 }
 
 func newModel(filename string) model {
-	navKeys := newKeybindingMap()
+	keybindingsMap := newKeybindingMap()
 
-	navDelegate := list.NewDefaultDelegate()
-	navKeyBindings := []key.Binding{navKeys.forward, navKeys.back, navKeys.toggleFocus}
-	navDelegate.ShortHelpFunc = func() []key.Binding { return navKeyBindings }
-	navDelegate.FullHelpFunc = func() [][]key.Binding { return [][]key.Binding{navKeyBindings} }
-	navDelegate.ShowDescription = false
+	delegate := list.NewDefaultDelegate()
+	keybindings := []key.Binding{keybindingsMap.forward, keybindingsMap.back, keybindingsMap.toggleFocus, keybindingsMap.copy}
+	delegate.ShortHelpFunc = func() []key.Binding { return keybindings }
+	delegate.FullHelpFunc = func() [][]key.Binding { return [][]key.Binding{keybindings} }
+	delegate.ShowDescription = false
 
-	navList := list.New([]list.Item{}, navDelegate, 0, 0)
+	l := list.New([]list.Item{}, delegate, 0, 0)
 	// We want to use left and right to navigate buckets and not change list pages.
-	navList.KeyMap.NextPage.Unbind()
-	navList.KeyMap.PrevPage.Unbind()
+	l.KeyMap.NextPage.Unbind()
+	l.KeyMap.PrevPage.Unbind()
 
-	navViewport := viewport.New(0, 0)
+	vp := viewport.New(0, 0)
 
 	return model{
 		filename: filename,
-		list:     navList,
-		keys:     navKeys,
+		list:     l,
+		keys:     keybindingsMap,
 		stack:    []Bucket{},
-		viewport: navViewport,
+		viewport: vp,
 	}
 }
 
@@ -87,6 +89,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.stack) > 1 {
 				m.stack = m.stack[:len(m.stack)-1]
 			}
+		case key.Matches(msg, m.keys.copy):
+			clipboard.Write(clipboard.FmtText, []byte(m.currentViewportContent))
+			cmds = append(cmds, m.list.NewStatusMessage("Copied!"))
+
 		case key.Matches(msg, m.keys.toggleFocus):
 			m.viewportFocused = !m.viewportFocused
 		}
@@ -163,6 +169,7 @@ type keybindingMap struct {
 	forward     key.Binding
 	back        key.Binding
 	toggleFocus key.Binding
+	copy        key.Binding
 }
 
 func newKeybindingMap() *keybindingMap {
@@ -179,6 +186,10 @@ func newKeybindingMap() *keybindingMap {
 			key.WithKeys("tab"),
 			key.WithHelp("tab", "toggle focus"),
 		),
+		copy: key.NewBinding(
+			key.WithKeys("c"),
+			key.WithHelp("c", "copy current content"),
+		),
 	}
 }
 
@@ -187,6 +198,10 @@ func main() {
 	filename := flag.Arg(0)
 	if filename == "" {
 		log.Fatal("no filename given")
+	}
+
+	if err := clipboard.Init(); err != nil {
+		log.Fatal(err)
 	}
 
 	if err := tea.NewProgram(newModel(filename), tea.WithAltScreen()).Start(); err != nil {
