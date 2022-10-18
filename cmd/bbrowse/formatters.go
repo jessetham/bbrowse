@@ -8,13 +8,11 @@ import (
 
 type formatter func([]byte) (string, bool)
 
-func newFormatterList() []formatter {
-	return []formatter{
-		gobFormatter,
-		asciiStringFormatter,
-		// Fallback if none of the other formatters work.
-		hexStringFormatter,
-	}
+var formatters = []formatter{
+	gobFormatter,
+	asciiStringFormatter,
+	// Fallback if none of the other formatters work.
+	hexStringFormatter,
 }
 
 func gobFormatter(b []byte) (string, bool) {
